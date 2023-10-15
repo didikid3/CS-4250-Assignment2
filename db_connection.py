@@ -1,9 +1,9 @@
 #-------------------------------------------------------------------------
-# AUTHOR: your name
-# FILENAME: title of the source file
-# SPECIFICATION: description of the program
-# FOR: CS 4250- Assignment #1
-# TIME SPENT: how long it took you to complete the assignment
+# AUTHOR: Brandon Chao
+# FILENAME: db_connection
+# SPECIFICATION: Reverse Index Database
+# FOR: CS 4250- Assignment #2
+# TIME SPENT: 3 hrs
 #-----------------------------------------------------------*/
 
 #IMPORTANT NOTE: DO NOT USE ANY ADVANCED PYTHON LIBRARY TO COMPLETE THIS CODE SUCH AS numpy OR pandas. You have to work here only with
@@ -62,7 +62,6 @@ def createDocument(cur, docId, docText, docTitle, docDate, docCat):
     
     text_noPunc = removePunc(docText)
     charSize = len(text_noPunc) - text_noPunc.count(' ')
-    print(text_noPunc, charSize)
 
     document_sql = "INSERT INTO document(docid, id, title, text, numchar, date) VALUES(%s,%s,%s,%s,%s,%s)"
 
@@ -93,16 +92,50 @@ def createDocument(cur, docId, docText, docTitle, docDate, docCat):
     # 4.2 Create a data structure the stores how many times (count) each term appears in the document
     # 4.3 Insert the term and its corresponding count into the database
     # --> add your Python code here
+    termDoc = {}
+    for term in text_terms:
+        termDoc[term] = text_noPunc.count(term)
 
-# def deleteDocument(cur, docId):
+    insert_termdoc_sql = "INSERT INTO termdoc(term, docid, count) VALUES(%s,%s,%s)"
+    for term, count in termDoc.items():
+        vals = [term, docId, count]
+        cur.execute(insert_termdoc_sql, vals)
 
-#     # 1 Query the index based on the document to identify terms
-#     # 1.1 For each term identified, delete its occurrences in the index for that document
-#     # 1.2 Check if there are no more occurrences of the term in another document. If this happens, delete the term from the database.
-#     # --> add your Python code here
+def deleteDocument(cur, docId):
 
-#     # 2 Delete the document from the database
-#     # --> add your Python code here
+    # 1 Query the index based on the document to identify terms
+    # 1.1 For each term identified, delete its occurrences in the index for that document
+    # 1.2 Check if there are no more occurrences of the term in another document. If this happens, delete the term from the database.
+    select_docterm_sql = "SELECT term FROM termdoc WHERE docid=%(docId)s"
+    cur.execute(select_docterm_sql, {'docId': docId})
+    recset = cur.fetchall()
+
+    terms = []
+    for term in recset:
+        terms.append(term['term'])
+    print(terms)
+
+    # Remove Document From TermDoc Tables
+    delete_docterm_sql = "DELETE FROM termdoc WHERE docid=%(docId)s"
+    vals = {'docId':docId}
+    cur.execute(delete_docterm_sql, vals)
+    
+    # Check if Term Exists in TermDoc
+    select_term_docterm_sql = "SELECT * FROM termdoc WHERE term=%(term)s"
+    delete_term_sql = "DELETE FROM terms WHERE term=%(term)s"
+    for term in terms:
+        cur.execute(select_term_docterm_sql, {'term':term})
+        res = cur.fetchall()
+
+        # If term no longer in use, remove term
+        if len(res) < 1:
+            cur.execute(delete_term_sql, {'term':term})
+
+
+    # 2 Delete the document from the database
+    delete_document_sql = "DELETE FROM document WHERE docid=%(docId)s"
+    vals = {'docId':docId}
+    cur.execute(delete_document_sql, vals)
 
 # def updateDocument(cur, docId, docText, docTitle, docDate, docCat):
 
@@ -121,5 +154,6 @@ def createDocument(cur, docId, docText, docTitle, docDate, docCat):
 
 con = connectDataBase()
 cur = con.cursor()
-createDocument(cur,0,";Hello --World","Test","10/14/2023", "Cat")
+# createDocument(cur, 0, ";Hello --World", "Test", "10/14/2023", "Cat")
+deleteDocument(cur, 0)
 con.commit()
