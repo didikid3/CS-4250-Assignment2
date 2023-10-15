@@ -145,15 +145,35 @@ def updateDocument(cur, docId, docText, docTitle, docDate, docCat):
     # 2 Create the document with the same id
     createDocument(cur, docId, docText, docTitle, docDate, docCat)
 
-# def getIndex(cur):
+def getIndex(cur):
 
-#     # Query the database to return the documents where each term occurs with their corresponding count. Output example:
-#     # {'baseball':'Exercise:1','summer':'Exercise:1,California:1,Arizona:1','months':'Exercise:1,Discovery:3'}
-#     # ...
-#     # --> add your Python code here
+    # Query the database to return the documents where each term occurs with their corresponding count. Output example:
+    # {'baseball':'Exercise:1','summer':'Exercise:1,California:1,Arizona:1','months':'Exercise:1,Discovery:3'}
+    # ...
+    select_termdoc_sql = "SELECT * FROM termdoc"
+    select_document_Sql = "SELECT title FROM document WHERE docid=%(docid)s"
+    cur.execute(select_termdoc_sql)
+    res = cur.fetchall()
 
-con = connectDataBase()
-cur = con.cursor()
-# createDocument(cur, 0, ";Hello --World", "Test", "10/14/2023", "Cat")
-deleteDocument(cur, 0)
-con.commit()
+    terms = {}
+    for row in res:
+        term = row['term']
+        docId = row['docid']
+        count = row['count']
+
+        cur.execute(select_document_Sql, {'docid':docId})
+        documentData = cur.fetchall()
+        title = documentData[0]['title']
+            
+
+
+        entry = title + ":" + str(count)
+
+        curList = terms[term] if term in terms else []
+        terms[term] = curList + [entry]
+    
+    for term, lstDocs in terms.items():
+        terms[term] = ",".join(lstDocs)
+
+    return terms
+        
