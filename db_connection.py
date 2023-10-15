@@ -42,25 +42,57 @@ def createCategory(cur, catId, catName):
     cur.execute(sql, recset)
 
 
-# def createDocument(cur, docId, docText, docTitle, docDate, docCat):
+def createDocument(cur, docId, docText, docTitle, docDate, docCat):
 
-#     # 1 Get the category id based on the informed category name
-#     # --> add your Python code here
+    # 1 Get the category id based on the informed category name
+    category_sql = "SELECT id FROM category WHERE name=%(idcat)s"
+    cur.execute(category_sql, {'idcat': docCat})
+    recset = cur.fetchall()
 
-#     # 2 Insert the document in the database. For num_chars, discard the spaces and punctuation marks.
-#     # --> add your Python code here
+    id = recset[0]['id']
+    
 
-#     # 3 Update the potential new terms.
-#     # 3.1 Find all terms that belong to the document. Use space " " as the delimiter character for terms and Remember to lowercase terms and remove punctuation marks.
-#     # 3.2 For each term identified, check if the term already exists in the database
-#     # 3.3 In case the term does not exist, insert it into the database
-#     # --> add your Python code here
+    # 2 Insert the document in the database. For num_chars, discard the spaces and punctuation marks.
+    def removePunc(text):
+        res_string = ""
+        for letter in text:
+            if letter not in __import__('string').punctuation:
+                res_string += letter
+        return res_string
+    
+    text_noPunc = removePunc(docText)
+    charSize = len(text_noPunc) - text_noPunc.count(' ')
+    print(text_noPunc, charSize)
 
-#     # 4 Update the index
-#     # 4.1 Find all terms that belong to the document
-#     # 4.2 Create a data structure the stores how many times (count) each term appears in the document
-#     # 4.3 Insert the term and its corresponding count into the database
-#     # --> add your Python code here
+    document_sql = "INSERT INTO document(docid, id, title, text, numchar, date) VALUES(%s,%s,%s,%s,%s,%s)"
+
+    recset = [docId, id, docTitle, docText, charSize, docDate]
+    cur.execute(document_sql, recset)
+
+    # 3 Update the potential new terms.
+    # 3.1 Find all terms that belong to the document. Use space " " as the delimiter character for terms and Remember to lowercase terms and remove punctuation marks.
+    # 3.2 For each term identified, check if the term already exists in the database
+    # 3.3 In case the term does not exist, insert it into the database
+    def identify_terms(text):
+        return text.split()
+    text_terms = identify_terms(text_noPunc)
+
+    search_term_sql = "SELECT * FROM terms WHERE term=%(term)s"
+    insert_term_sql = "INSERT INTO terms(term, numchar) VALUES(%s,%s)"
+    for term in text_terms:
+        cur.execute(search_term_sql, {'term': term})
+        recset = cur.fetchall()
+
+        #If term is new, generate new row in Terms Table
+        if len(recset) < 1:
+            vals = [term, len(term)]
+            cur.execute(insert_term_sql, vals)
+
+    # 4 Update the index
+    # 4.1 Find all terms that belong to the document
+    # 4.2 Create a data structure the stores how many times (count) each term appears in the document
+    # 4.3 Insert the term and its corresponding count into the database
+    # --> add your Python code here
 
 # def deleteDocument(cur, docId):
 
@@ -89,5 +121,5 @@ def createCategory(cur, catId, catName):
 
 con = connectDataBase()
 cur = con.cursor()
-createCategory(cur, "2", "Cats")
+createDocument(cur,0,";Hello --World","Test","10/14/2023", "Cat")
 con.commit()
