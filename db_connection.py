@@ -137,13 +137,13 @@ def deleteDocument(cur, docId):
     vals = {'docId':docId}
     cur.execute(delete_document_sql, vals)
 
-# def updateDocument(cur, docId, docText, docTitle, docDate, docCat):
+def updateDocument(cur, docId, docText, docTitle, docDate, docCat):
 
-#     # 1 Delete the document
-#     # --> add your Python code here
+    # 1 Delete the document
+    deleteDocument(cur, docId)
 
-#     # 2 Create the document with the same id
-#     # --> add your Python code here
+    # 2 Create the document with the same id
+    createDocument(cur, docId, docText, docTitle, docDate, docCat)
 
 # def getIndex(cur):
 
