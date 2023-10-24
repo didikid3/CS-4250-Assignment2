@@ -1,0 +1,17 @@
+{
+    "Title" : "Schools News",
+    "Text" : "The school news!",
+    "Category" : "School",
+    "num_chars" : 13,
+    "Date" : "2015-12-15T08:00:00.000+00:00",
+    "Terms" : [
+        {
+            "Term" : "school",
+            "count" : 1
+        },
+        {
+            "Term" : "news",
+            "count" : 1
+        }
+    ]
+}

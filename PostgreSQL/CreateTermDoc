@@ -1,0 +1,16 @@
+-- Table: public.termdoc
+
+-- DROP TABLE IF EXISTS public.termdoc;
+
+CREATE TABLE IF NOT EXISTS public.termdoc
+(
+    term character varying COLLATE pg_catalog."default" NOT NULL,
+    docid integer NOT NULL,
+    count integer,
+    CONSTRAINT term_doc_pkey PRIMARY KEY (term, docid)
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.termdoc
+    OWNER to postgres;

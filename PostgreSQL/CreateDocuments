@@ -1,0 +1,19 @@
+-- Table: public.document
+
+-- DROP TABLE IF EXISTS public.document;
+
+CREATE TABLE IF NOT EXISTS public.document
+(
+    docid integer NOT NULL,
+    id integer,
+    title character varying COLLATE pg_catalog."default",
+    text character varying COLLATE pg_catalog."default",
+    numchar integer,
+    date date,
+    CONSTRAINT document_pkey PRIMARY KEY (docid)
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.document
+    OWNER to postgres;
