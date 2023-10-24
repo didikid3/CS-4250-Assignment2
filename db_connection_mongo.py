@@ -71,19 +71,33 @@ def deleteDocument(col, docId):
     col.delete_one({"_id": id})
 
 def updateDocument(col, docId, docText, docTitle, docDate, docCat):
-    pass
-
     # Delete the document
-    # --> add your Python code here
+    deleteDocument(col, docId)
 
     # Create the document with the same id
-    # --> add your Python code here
+    createDocument(col, docId, docText, docTitle, docDate, docCat)
 
 def getIndex(col):
-    pass
-
     # Query the database to return the documents where each term occurs with their corresponding count. Output example:
     # {'baseball':'Exercise:1','summer':'Exercise:1,California:1,Arizona:1','months':'Exercise:1,Discovery:3'}
     # ...
-    # --> add your Python code here
+    terms = {}
+    for x in col.find({},{\
+        "_id":0,
+        "Title":1,
+        "Terms":1
+    }):
+        title = x["Title"]
+        for term in x["Terms"]:
+            term_name = term["Term"]
+            count = term["count"]
+            entry = title+":"+str(count)
+
+            curList = terms[term_name] if term_name in terms else []
+            terms[term_name] = curList + [entry]
+
+    for term, lstDocs in terms.items():
+        terms[term] = ",".join(lstDocs)
+    print(terms)
+    return "END"
 
